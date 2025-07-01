@@ -1,0 +1,1 @@
+web: python -m uvicorn api_bridge:app --host=0.0.0.0 --port=${PORT:-8000}
