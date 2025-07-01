@@ -18,9 +18,19 @@ app = FastAPI(title="MoodScope API Bridge", version="1.0.0")
 # Enable CORS for Next.js frontend
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:3000", "http://localhost:3001", "http://localhost:3002", "http://127.0.0.1:3000", "http://127.0.0.1:3001", "http://127.0.0.1:3002"],
+    allow_origins=[
+        "http://localhost:3000", 
+        "http://localhost:3001", 
+        "http://localhost:3002", 
+        "http://localhost:3004",
+        "http://127.0.0.1:3000", 
+        "http://127.0.0.1:3001", 
+        "http://127.0.0.1:3002",
+        "http://127.0.0.1:3004",
+        "https://moodscope-ai.vercel.app"
+    ],
     allow_credentials=True,
-    allow_methods=["*"],
+    allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"],
     allow_headers=["*"],
 )
 
