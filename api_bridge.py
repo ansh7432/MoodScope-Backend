@@ -298,65 +298,198 @@ async def analyze_playlist(request: PlaylistRequest):
 
 @app.get("/demo")
 async def demo_analysis():
-    """Demo endpoint with sample data for testing frontend"""
+    """Demo endpoint with sample data for testing frontend - redirects to demo1"""
+    return await demo_upbeat_playlist()
+
+@app.get("/demo/upbeat")
+async def demo_upbeat_playlist():
+    """Demo endpoint with upbeat/energetic playlist - 20 songs"""
     demo_tracks = [
-        {
-            "name": "Happy Song",
-            "artist": "Demo Artist",
-            "mood_score": 0.8,
-            "energy": 0.9,
-            "valence": 0.85,
-            "danceability": 0.7,
-            "acousticness": 0.2,
-            "speechiness": 0.1,
-            "instrumentalness": 0.0,
-            "popularity": 75,
-            "mood_category": "Energetic & Happy"
-        },
-        {
-            "name": "Calm Melody",
-            "artist": "Demo Artist 2",
-            "mood_score": 0.4,
-            "energy": 0.3,
-            "valence": 0.5,
-            "danceability": 0.3,
-            "acousticness": 0.8,
-            "speechiness": 0.05,
-            "instrumentalness": 0.2,
-            "popularity": 60,
-            "mood_category": "Calm & Content"
-        }
+        {"name": "Blinding Lights", "artist": "The Weeknd", "mood_score": 0.9, "energy": 0.9, "valence": 0.8, "danceability": 0.8, "acousticness": 0.1, "speechiness": 0.1, "instrumentalness": 0.0, "popularity": 95, "mood_category": "Energetic & Happy"},
+        {"name": "Levitating", "artist": "Dua Lipa", "mood_score": 0.85, "energy": 0.85, "valence": 0.9, "danceability": 0.9, "acousticness": 0.1, "speechiness": 0.05, "instrumentalness": 0.0, "popularity": 90, "mood_category": "Energetic & Happy"},
+        {"name": "Good 4 U", "artist": "Olivia Rodrigo", "mood_score": 0.8, "energy": 0.9, "valence": 0.7, "danceability": 0.7, "acousticness": 0.2, "speechiness": 0.2, "instrumentalness": 0.0, "popularity": 88, "mood_category": "Energetic & Excited"},
+        {"name": "Anti-Hero", "artist": "Taylor Swift", "mood_score": 0.7, "energy": 0.8, "valence": 0.6, "danceability": 0.7, "acousticness": 0.3, "speechiness": 0.1, "instrumentalness": 0.0, "popularity": 92, "mood_category": "Energetic & Confident"},
+        {"name": "As It Was", "artist": "Harry Styles", "mood_score": 0.75, "energy": 0.7, "valence": 0.8, "danceability": 0.6, "acousticness": 0.4, "speechiness": 0.05, "instrumentalness": 0.0, "popularity": 89, "mood_category": "Upbeat & Nostalgic"},
+        {"name": "Heat Waves", "artist": "Glass Animals", "mood_score": 0.7, "energy": 0.6, "valence": 0.8, "danceability": 0.7, "acousticness": 0.3, "speechiness": 0.1, "instrumentalness": 0.1, "popularity": 85, "mood_category": "Chill & Happy"},
+        {"name": "Industry Baby", "artist": "Lil Nas X", "mood_score": 0.9, "energy": 0.95, "valence": 0.85, "danceability": 0.9, "acousticness": 0.05, "speechiness": 0.3, "instrumentalness": 0.0, "popularity": 87, "mood_category": "Energetic & Confident"},
+        {"name": "Stay", "artist": "The Kid LAROI & Justin Bieber", "mood_score": 0.8, "energy": 0.8, "valence": 0.75, "danceability": 0.8, "acousticness": 0.2, "speechiness": 0.1, "instrumentalness": 0.0, "popularity": 86, "mood_category": "Energetic & Happy"},
+        {"name": "Peaches", "artist": "Justin Bieber", "mood_score": 0.85, "energy": 0.7, "valence": 0.9, "danceability": 0.8, "acousticness": 0.3, "speechiness": 0.1, "instrumentalness": 0.0, "popularity": 84, "mood_category": "Chill & Happy"},
+        {"name": "Sunflower", "artist": "Post Malone & Swae Lee", "mood_score": 0.8, "energy": 0.7, "valence": 0.85, "danceability": 0.7, "acousticness": 0.2, "speechiness": 0.15, "instrumentalness": 0.0, "popularity": 83, "mood_category": "Upbeat & Cheerful"},
+        {"name": "Watermelon Sugar", "artist": "Harry Styles", "mood_score": 0.9, "energy": 0.8, "valence": 0.95, "danceability": 0.8, "acousticness": 0.3, "speechiness": 0.05, "instrumentalness": 0.0, "popularity": 82, "mood_category": "Energetic & Happy"},
+        {"name": "Flowers", "artist": "Miley Cyrus", "mood_score": 0.85, "energy": 0.8, "valence": 0.8, "danceability": 0.7, "acousticness": 0.3, "speechiness": 0.1, "instrumentalness": 0.0, "popularity": 90, "mood_category": "Energetic & Empowering"},
+        {"name": "Unholy", "artist": "Sam Smith ft. Kim Petras", "mood_score": 0.7, "energy": 0.85, "valence": 0.6, "danceability": 0.8, "acousticness": 0.1, "speechiness": 0.2, "instrumentalness": 0.0, "popularity": 88, "mood_category": "Energetic & Edgy"},
+        {"name": "About Damn Time", "artist": "Lizzo", "mood_score": 0.95, "energy": 0.9, "valence": 0.95, "danceability": 0.9, "acousticness": 0.1, "speechiness": 0.15, "instrumentalness": 0.0, "popularity": 85, "mood_category": "Energetic & Empowering"},
+        {"name": "Bad Habit", "artist": "Steve Lacy", "mood_score": 0.75, "energy": 0.6, "valence": 0.8, "danceability": 0.7, "acousticness": 0.4, "speechiness": 0.1, "instrumentalness": 0.1, "popularity": 81, "mood_category": "Chill & Groovy"},
+        {"name": "Running Up That Hill", "artist": "Kate Bush", "mood_score": 0.6, "energy": 0.7, "valence": 0.5, "danceability": 0.6, "acousticness": 0.2, "speechiness": 0.1, "instrumentalness": 0.3, "popularity": 79, "mood_category": "Intense & Emotional"},
+        {"name": "I'm Good (Blue)", "artist": "David Guetta & Bebe Rexha", "mood_score": 0.9, "energy": 0.95, "valence": 0.9, "danceability": 0.95, "acousticness": 0.05, "speechiness": 0.1, "instrumentalness": 0.0, "popularity": 87, "mood_category": "Energetic & Euphoric"},
+        {"name": "Calm Down", "artist": "Rema", "mood_score": 0.8, "energy": 0.7, "valence": 0.85, "danceability": 0.8, "acousticness": 0.2, "speechiness": 0.1, "instrumentalness": 0.0, "popularity": 83, "mood_category": "Chill & Happy"},
+        {"name": "Super Freaky Girl", "artist": "Nicki Minaj", "mood_score": 0.85, "energy": 0.9, "valence": 0.8, "danceability": 0.9, "acousticness": 0.1, "speechiness": 0.4, "instrumentalness": 0.0, "popularity": 82, "mood_category": "Energetic & Confident"},
+        {"name": "Break My Soul", "artist": "Beyoncé", "mood_score": 0.9, "energy": 0.95, "valence": 0.85, "danceability": 0.95, "acousticness": 0.05, "speechiness": 0.2, "instrumentalness": 0.0, "popularity": 84, "mood_category": "Energetic & Empowering"}
     ]
     
-    demo_mood_summary = {
-        "total_tracks": 2,
-        "mood_score": 0.6,
-        "avg_energy": 0.6,
-        "avg_valence": 0.675,
-        "avg_danceability": 0.5,
-        "avg_acousticness": 0.5,
-        "avg_speechiness": 0.075,
-        "avg_instrumentalness": 0.1,
-        "avg_popularity": 67.5,
+    mood_summary = {
+        "total_tracks": 20,
+        "mood_score": 0.82,
+        "avg_energy": 0.81,
+        "avg_valence": 0.8,
+        "avg_danceability": 0.78,
+        "avg_acousticness": 0.22,
+        "avg_speechiness": 0.13,
+        "avg_instrumentalness": 0.02,
+        "avg_popularity": 85.5,
         "dominant_mood": "Energetic & Happy",
         "most_common_mood": "Energetic & Happy",
-        "mood_distribution": {"Energetic & Happy": 1, "Calm & Content": 1},
-        "emotional_range": 0.4,
+        "mood_distribution": {
+            "Energetic & Happy": 6,
+            "Energetic & Confident": 3,
+            "Energetic & Empowering": 3,
+            "Chill & Happy": 3,
+            "Upbeat & Cheerful": 2,
+            "Other": 3
+        },
+        "emotional_range": 0.35,
         "using_estimates": False
     }
     
-    demo_ai_insights = {
-        "emotional_analysis": "This demo playlist shows a balanced mix of energetic and calm tracks, indicating emotional versatility and good mood regulation skills.",
-        "personality_traits": ["Emotionally balanced", "Appreciates variety", "Good mood awareness"],
-        "recommendations": ["Try exploring more upbeat tracks for energy", "Consider acoustic music for relaxation"],
-        "mood_coaching": "Your demo playlist suggests you understand how to use music for different emotional states - a sign of good emotional intelligence!"
+    ai_insights = {
+        "emotional_analysis": "This is a high-energy playlist perfect for workouts, parties, or boosting your mood. The tracks show a preference for uplifting, danceable music with strong positive vibes.",
+        "personality_traits": ["Energetic", "Optimistic", "Socially confident", "Trend-aware", "Motivation-seeking"],
+        "recommendations": ["Perfect for morning motivation", "Great for social gatherings", "Try exploring more dance/electronic genres", "Consider adding some throwback hits"],
+        "mood_coaching": "Your music taste suggests you use upbeat music to maintain high energy and positive emotions. This indicates strong emotional regulation skills and a proactive approach to mood management!"
     }
     
     return AnalysisResponse(
         tracks=demo_tracks,
-        mood_summary=demo_mood_summary,
-        ai_insights=demo_ai_insights,
-        playlist_name="Demo Playlist"
+        mood_summary=mood_summary,
+        ai_insights=ai_insights,
+        playlist_name="✨ Upbeat Vibes - Demo Playlist"
+    )
+
+@app.get("/demo/chill")
+async def demo_chill_playlist():
+    """Demo endpoint with chill/relaxing playlist - 20 songs"""
+    demo_tracks = [
+        {"name": "Weightless", "artist": "Marconi Union", "mood_score": 0.3, "energy": 0.1, "valence": 0.6, "danceability": 0.2, "acousticness": 0.9, "speechiness": 0.0, "instrumentalness": 0.9, "popularity": 45, "mood_category": "Deeply Relaxing"},
+        {"name": "Clair de Lune", "artist": "Claude Debussy", "mood_score": 0.4, "energy": 0.2, "valence": 0.7, "danceability": 0.1, "acousticness": 0.95, "speechiness": 0.0, "instrumentalness": 1.0, "popularity": 40, "mood_category": "Peaceful & Serene"},
+        {"name": "River", "artist": "Joni Mitchell", "mood_score": 0.45, "energy": 0.3, "valence": 0.5, "danceability": 0.3, "acousticness": 0.8, "speechiness": 0.05, "instrumentalness": 0.2, "popularity": 50, "mood_category": "Melancholic & Reflective"},
+        {"name": "Mad World", "artist": "Gary Jules", "mood_score": 0.2, "energy": 0.2, "valence": 0.2, "danceability": 0.2, "acousticness": 0.9, "speechiness": 0.05, "instrumentalness": 0.3, "popularity": 55, "mood_category": "Melancholic & Contemplative"},
+        {"name": "Holocene", "artist": "Bon Iver", "mood_score": 0.4, "energy": 0.3, "valence": 0.4, "danceability": 0.2, "acousticness": 0.8, "speechiness": 0.05, "instrumentalness": 0.4, "popularity": 58, "mood_category": "Contemplative & Peaceful"},
+        {"name": "Black", "artist": "Pearl Jam", "mood_score": 0.3, "energy": 0.4, "valence": 0.3, "danceability": 0.3, "acousticness": 0.6, "speechiness": 0.05, "instrumentalness": 0.1, "popularity": 60, "mood_category": "Melancholic & Emotional"},
+        {"name": "Breathe Me", "artist": "Sia", "mood_score": 0.35, "energy": 0.4, "valence": 0.3, "danceability": 0.3, "acousticness": 0.7, "speechiness": 0.1, "instrumentalness": 0.2, "popularity": 62, "mood_category": "Vulnerable & Reflective"},
+        {"name": "Skinny Love", "artist": "Bon Iver", "mood_score": 0.4, "energy": 0.3, "valence": 0.4, "danceability": 0.2, "acousticness": 0.9, "speechiness": 0.05, "instrumentalness": 0.3, "popularity": 65, "mood_category": "Melancholic & Beautiful"},
+        {"name": "The Night We Met", "artist": "Lord Huron", "mood_score": 0.35, "energy": 0.4, "valence": 0.3, "danceability": 0.3, "acousticness": 0.8, "speechiness": 0.05, "instrumentalness": 0.1, "popularity": 68, "mood_category": "Nostalgic & Bittersweet"},
+        {"name": "Hurt", "artist": "Johnny Cash", "mood_score": 0.25, "energy": 0.3, "valence": 0.2, "danceability": 0.2, "acousticness": 0.7, "speechiness": 0.1, "instrumentalness": 0.2, "popularity": 70, "mood_category": "Deeply Emotional"},
+        {"name": "Hallelujah", "artist": "Jeff Buckley", "mood_score": 0.4, "energy": 0.4, "valence": 0.4, "danceability": 0.2, "acousticness": 0.8, "speechiness": 0.05, "instrumentalness": 0.1, "popularity": 72, "mood_category": "Spiritual & Moving"},
+        {"name": "Comfortably Numb", "artist": "Pink Floyd", "mood_score": 0.3, "energy": 0.5, "valence": 0.3, "danceability": 0.3, "acousticness": 0.4, "speechiness": 0.05, "instrumentalness": 0.6, "popularity": 75, "mood_category": "Contemplative & Atmospheric"},
+        {"name": "Tears in Heaven", "artist": "Eric Clapton", "mood_score": 0.35, "energy": 0.3, "valence": 0.3, "danceability": 0.2, "acousticness": 0.9, "speechiness": 0.05, "instrumentalness": 0.1, "popularity": 73, "mood_category": "Melancholic & Healing"},
+        {"name": "Mad About You", "artist": "Sting", "mood_score": 0.5, "energy": 0.4, "valence": 0.6, "danceability": 0.4, "acousticness": 0.6, "speechiness": 0.05, "instrumentalness": 0.2, "popularity": 58, "mood_category": "Romantic & Gentle"},
+        {"name": "Black No. 1", "artist": "Type O Negative", "mood_score": 0.2, "energy": 0.6, "valence": 0.2, "danceability": 0.4, "acousticness": 0.2, "speechiness": 0.1, "instrumentalness": 0.3, "popularity": 45, "mood_category": "Dark & Intense"},
+        {"name": "Sour Times", "artist": "Portishead", "mood_score": 0.25, "energy": 0.3, "valence": 0.2, "danceability": 0.4, "acousticness": 0.3, "speechiness": 0.1, "instrumentalness": 0.4, "popularity": 48, "mood_category": "Moody & Atmospheric"},
+        {"name": "Teardrop", "artist": "Massive Attack", "mood_score": 0.4, "energy": 0.3, "valence": 0.4, "danceability": 0.5, "acousticness": 0.4, "speechiness": 0.05, "instrumentalness": 0.6, "popularity": 52, "mood_category": "Atmospheric & Emotional"},
+        {"name": "Hide and Seek", "artist": "Imogen Heap", "mood_score": 0.3, "energy": 0.2, "valence": 0.3, "danceability": 0.2, "acousticness": 0.8, "speechiness": 0.1, "instrumentalness": 0.7, "popularity": 55, "mood_category": "Ethereal & Haunting"},
+        {"name": "Falling", "artist": "Harry Styles", "mood_score": 0.35, "energy": 0.3, "valence": 0.3, "danceability": 0.2, "acousticness": 0.9, "speechiness": 0.05, "instrumentalness": 0.1, "popularity": 78, "mood_category": "Vulnerable & Heartfelt"},
+        {"name": "Someone Like You", "artist": "Adele", "mood_score": 0.4, "energy": 0.4, "valence": 0.3, "danceability": 0.3, "acousticness": 0.8, "speechiness": 0.05, "instrumentalness": 0.0, "popularity": 80, "mood_category": "Melancholic & Powerful"}
+    ]
+    
+    mood_summary = {
+        "total_tracks": 20,
+        "mood_score": 0.34,
+        "avg_energy": 0.34,
+        "avg_valence": 0.37,
+        "avg_danceability": 0.28,
+        "avg_acousticness": 0.72,
+        "avg_speechiness": 0.06,
+        "avg_instrumentalness": 0.32,
+        "avg_popularity": 60.7,
+        "dominant_mood": "Melancholic & Reflective",
+        "most_common_mood": "Melancholic & Reflective",
+        "mood_distribution": {
+            "Melancholic & Reflective": 6,
+            "Contemplative & Peaceful": 4,
+            "Atmospheric & Emotional": 3,
+            "Vulnerable & Heartfelt": 3,
+            "Deeply Emotional": 2,
+            "Other": 2
+        },
+        "emotional_range": 0.6,
+        "using_estimates": False
+    }
+    
+    ai_insights = {
+        "emotional_analysis": "This playlist reflects a deep, introspective musical taste with preference for emotional depth and atmospheric soundscapes. The music serves as a space for reflection and emotional processing.",
+        "personality_traits": ["Introspective", "Emotionally deep", "Artistic", "Contemplative", "Values authenticity"],
+        "recommendations": ["Perfect for quiet evenings and reflection", "Great for creative work or meditation", "Consider exploring ambient and post-rock genres", "Try adding some nature sounds for deeper relaxation"],
+        "mood_coaching": "Your music choices suggest you're comfortable exploring complex emotions and use music for emotional processing. This indicates high emotional intelligence and self-awareness."
+    }
+    
+    return AnalysisResponse(
+        tracks=demo_tracks,
+        mood_summary=mood_summary,
+        ai_insights=ai_insights,
+        playlist_name="🌙 Chill Reflections - Demo Playlist"
+    )
+
+@app.get("/demo/mixed")
+async def demo_mixed_playlist():
+    """Demo endpoint with mixed mood playlist - 20 songs"""
+    demo_tracks = [
+        {"name": "Bohemian Rhapsody", "artist": "Queen", "mood_score": 0.7, "energy": 0.8, "valence": 0.6, "danceability": 0.5, "acousticness": 0.3, "speechiness": 0.1, "instrumentalness": 0.2, "popularity": 95, "mood_category": "Epic & Dramatic"},
+        {"name": "Stairway to Heaven", "artist": "Led Zeppelin", "mood_score": 0.6, "energy": 0.7, "valence": 0.5, "danceability": 0.4, "acousticness": 0.4, "speechiness": 0.05, "instrumentalness": 0.3, "popularity": 90, "mood_category": "Epic & Transcendent"},
+        {"name": "Smells Like Teen Spirit", "artist": "Nirvana", "mood_score": 0.5, "energy": 0.9, "valence": 0.4, "danceability": 0.6, "acousticness": 0.1, "speechiness": 0.2, "instrumentalness": 0.1, "popularity": 88, "mood_category": "Energetic & Rebellious"},
+        {"name": "Billie Jean", "artist": "Michael Jackson", "mood_score": 0.8, "energy": 0.8, "valence": 0.7, "danceability": 0.9, "acousticness": 0.1, "speechiness": 0.1, "instrumentalness": 0.0, "popularity": 92, "mood_category": "Energetic & Groovy"},
+        {"name": "Hotel California", "artist": "Eagles", "mood_score": 0.5, "energy": 0.6, "valence": 0.4, "danceability": 0.4, "acousticness": 0.3, "speechiness": 0.05, "instrumentalness": 0.4, "popularity": 89, "mood_category": "Mysterious & Atmospheric"},
+        {"name": "Sweet Child O' Mine", "artist": "Guns N' Roses", "mood_score": 0.8, "energy": 0.9, "valence": 0.8, "danceability": 0.6, "acousticness": 0.1, "speechiness": 0.1, "instrumentalness": 0.2, "popularity": 87, "mood_category": "Energetic & Passionate"},
+        {"name": "Imagine", "artist": "John Lennon", "mood_score": 0.6, "energy": 0.3, "valence": 0.7, "danceability": 0.3, "acousticness": 0.8, "speechiness": 0.05, "instrumentalness": 0.1, "popularity": 85, "mood_category": "Peaceful & Hopeful"},
+        {"name": "What's Going On", "artist": "Marvin Gaye", "mood_score": 0.5, "energy": 0.5, "valence": 0.4, "danceability": 0.6, "acousticness": 0.3, "speechiness": 0.1, "instrumentalness": 0.2, "popularity": 78, "mood_category": "Contemplative & Soulful"},
+        {"name": "Purple Rain", "artist": "Prince", "mood_score": 0.7, "energy": 0.7, "valence": 0.6, "danceability": 0.5, "acousticness": 0.2, "speechiness": 0.1, "instrumentalness": 0.3, "popularity": 84, "mood_category": "Emotional & Powerful"},
+        {"name": "Thriller", "artist": "Michael Jackson", "mood_score": 0.8, "energy": 0.9, "valence": 0.7, "danceability": 0.9, "acousticness": 0.1, "speechiness": 0.2, "instrumentalness": 0.1, "popularity": 91, "mood_category": "Energetic & Fun"},
+        {"name": "Like a Rolling Stone", "artist": "Bob Dylan", "mood_score": 0.6, "energy": 0.7, "valence": 0.5, "danceability": 0.5, "acousticness": 0.3, "speechiness": 0.3, "instrumentalness": 0.2, "popularity": 80, "mood_category": "Rebellious & Poetic"},
+        {"name": "Good Vibrations", "artist": "The Beach Boys", "mood_score": 0.9, "energy": 0.8, "valence": 0.9, "danceability": 0.7, "acousticness": 0.2, "speechiness": 0.1, "instrumentalness": 0.3, "popularity": 82, "mood_category": "Energetic & Joyful"},
+        {"name": "What's Love Got to Do with It", "artist": "Tina Turner", "mood_score": 0.7, "energy": 0.8, "valence": 0.6, "danceability": 0.8, "acousticness": 0.1, "speechiness": 0.1, "instrumentalness": 0.0, "popularity": 79, "mood_category": "Energetic & Empowering"},
+        {"name": "Born to Run", "artist": "Bruce Springsteen", "mood_score": 0.8, "energy": 0.9, "valence": 0.8, "danceability": 0.6, "acousticness": 0.1, "speechiness": 0.2, "instrumentalness": 0.1, "popularity": 81, "mood_category": "Energetic & Anthemic"},
+        {"name": "Bridge Over Troubled Water", "artist": "Simon & Garfunkel", "mood_score": 0.6, "energy": 0.4, "valence": 0.6, "danceability": 0.2, "acousticness": 0.7, "speechiness": 0.05, "instrumentalness": 0.1, "popularity": 77, "mood_category": "Comforting & Spiritual"},
+        {"name": "Respect", "artist": "Aretha Franklin", "mood_score": 0.9, "energy": 0.9, "valence": 0.8, "danceability": 0.8, "acousticness": 0.1, "speechiness": 0.2, "instrumentalness": 0.0, "popularity": 86, "mood_category": "Energetic & Empowering"},
+        {"name": "The Sound of Silence", "artist": "Simon & Garfunkel", "mood_score": 0.4, "energy": 0.3, "valence": 0.3, "danceability": 0.2, "acousticness": 0.8, "speechiness": 0.05, "instrumentalness": 0.2, "popularity": 83, "mood_category": "Contemplative & Melancholic"},
+        {"name": "Yesterday", "artist": "The Beatles", "mood_score": 0.4, "energy": 0.3, "valence": 0.3, "danceability": 0.2, "acousticness": 0.9, "speechiness": 0.05, "instrumentalness": 0.3, "popularity": 88, "mood_category": "Melancholic & Beautiful"},
+        {"name": "Don't Stop Believin'", "artist": "Journey", "mood_score": 0.9, "energy": 0.9, "valence": 0.9, "danceability": 0.7, "acousticness": 0.1, "speechiness": 0.1, "instrumentalness": 0.2, "popularity": 89, "mood_category": "Energetic & Uplifting"},
+        {"name": "My Girl", "artist": "The Temptations", "mood_score": 0.9, "energy": 0.6, "valence": 0.95, "danceability": 0.7, "acousticness": 0.2, "speechiness": 0.1, "instrumentalness": 0.1, "popularity": 85, "mood_category": "Joyful & Romantic"}
+    ]
+    
+    mood_summary = {
+        "total_tracks": 20,
+        "mood_score": 0.71,
+        "avg_energy": 0.71,
+        "avg_valence": 0.64,
+        "avg_danceability": 0.57,
+        "avg_acousticness": 0.32,
+        "avg_speechiness": 0.12,
+        "avg_instrumentalness": 0.18,
+        "avg_popularity": 85.1,
+        "dominant_mood": "Energetic & Powerful",
+        "most_common_mood": "Energetic & Powerful",
+        "mood_distribution": {
+            "Energetic & Powerful": 8,
+            "Contemplative & Emotional": 4,
+            "Epic & Dramatic": 3,
+            "Joyful & Uplifting": 3,
+            "Melancholic & Beautiful": 2
+        },
+        "emotional_range": 0.65,
+        "using_estimates": False
+    }
+    
+    ai_insights = {
+        "emotional_analysis": "This playlist showcases a sophisticated musical taste spanning multiple decades and genres. You appreciate both emotional depth and energetic anthems, indicating a well-rounded personality that values both introspection and celebration.",
+        "personality_traits": ["Musically sophisticated", "Emotionally complex", "Appreciates classics", "Values artistic depth", "Socially adaptable"],
+        "recommendations": ["Perfect for road trips and social gatherings", "Great mix for different moods throughout the day", "Consider exploring more contemporary artists with similar depth", "Try creating themed playlists by decade or genre"],
+        "mood_coaching": "Your diverse musical taste suggests emotional maturity and the ability to appreciate different perspectives. This playlist could work for almost any social situation - you're the person people trust with the aux cord!"
+    }
+    
+    return AnalysisResponse(
+        tracks=demo_tracks,
+        mood_summary=mood_summary,
+        ai_insights=ai_insights,
+        playlist_name="🎭 Classic Mix - Demo Playlist"
     )
 
 @app.get("/test-spotify")
@@ -379,7 +512,10 @@ async def root():
         "endpoints": {
             "health": "/health",
             "analyze": "/analyze (POST)",
-            "demo": "/demo (GET) - for testing frontend",
+            "demo": "/demo (GET) - upbeat playlist demo",
+            "demo_upbeat": "/demo/upbeat (GET) - 20 energetic songs",
+            "demo_chill": "/demo/chill (GET) - 20 relaxing songs", 
+            "demo_mixed": "/demo/mixed (GET) - 20 classic mixed mood songs",
             "docs": "/docs"
         },
         "frontend_url": "http://localhost:3001",
