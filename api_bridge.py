@@ -12,6 +12,10 @@ import os
 import subprocess
 import json
 from pathlib import Path
+from dotenv import load_dotenv
+
+# Load environment variables
+load_dotenv()
 
 app = FastAPI(title="MoodScope API Bridge", version="1.0.0")
 
@@ -27,7 +31,9 @@ app.add_middleware(
         "http://127.0.0.1:3001", 
         "http://127.0.0.1:3002",
         "http://127.0.0.1:3004",
-        "https://moodscope-ai.vercel.app"
+        "https://moodscope-ai.vercel.app",
+        "https://nextmoodscale.vercel.app",
+        "https://moodscope-frontend.vercel.app"
     ],
     allow_credentials=True,
     allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"],
@@ -502,6 +508,11 @@ async def test_spotify():
         return {"status": "success", "message": "Spotify connection working", "tracks_found": len(result.get("tracks", []))}
     except Exception as e:
         return {"status": "error", "message": str(e)}
+
+@app.get("/health")
+async def health():
+    """Health check endpoint for Railway deployment"""
+    return {"status": "healthy", "service": "MoodScope API Bridge"}
 
 @app.get("/")
 async def root():
