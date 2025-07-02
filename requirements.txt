@@ -3,3 +3,5 @@ uvicorn==0.32.1
 spotipy==2.25.1
 requests==2.32.4
 python-dotenv==1.1.1
+pandas==2.2.3
+numpy==2.0.0
