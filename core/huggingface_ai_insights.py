@@ -1,264 +1,270 @@
 """
-MoodScope - Hugging Face AI Insights Module
-Generates personalized insights using Hugging Face transformers models
-No API key required - runs locally!
+Hugging Face AI Insights Generator - Online API
+Provides detailed psychological insights using Hugging Face sentiment analysis
 """
 
-from transformers import pipeline, AutoTokenizer, AutoModelForCausalLM
+import requests
 from typing import Dict, List
+import random
 import json
 import os
-import torch
-import re
+from dotenv import load_dotenv
 
-class HuggingFaceMoodAI:
+load_dotenv()
+
+class HuggingFaceAI:
     def __init__(self):
-        """Initialize Hugging Face models"""
-        print("🤖 Loading Hugging Face AI models...")
-        
-        # Check if GPU is available
-        self.device = 0 if torch.cuda.is_available() else -1
-        device_name = "GPU" if self.device == 0 else "CPU"
-        print(f"📱 Using device: {device_name}")
-        
-        # Initialize text generation pipeline with a smaller, efficient model
+        """Initialize Hugging Face AI with API token"""
+        self.api_token = os.getenv('HUGGINGFACE_API_TOKEN', 'your_token_here')
+        self.api_url = "https://api-inference.huggingface.co/models/cardiffnlp/twitter-roberta-base-sentiment"
+        self.headers = {"Authorization": f"Bearer {self.api_token}"}
+    
+    def _call_huggingface_api(self, text: str) -> Dict:
+        """Call Hugging Face sentiment analysis API"""
         try:
-            self.generator = pipeline(
-                "text-generation",
-                model="microsoft/DialoGPT-medium",
-                device=self.device,
-                max_length=512,
-                do_sample=True,
-                temperature=0.7,
-                pad_token_id=50256
-            )
-            print("✅ Hugging Face AI model loaded successfully!")
+            payload = {"inputs": text}
+            response = requests.post(self.api_url, headers=self.headers, json=payload, timeout=30)
+            
+            if response.status_code == 200:
+                result = response.json()
+                if isinstance(result, list) and len(result) > 0 and isinstance(result[0], list):
+                    # Parse sentiment scores - LABEL_0=negative, LABEL_1=neutral, LABEL_2=positive
+                    sentiments = result[0]
+                    sentiment_map = {"positive": 0.33, "negative": 0.33, "neutral": 0.33}
+                    
+                    for sentiment in sentiments:
+                        label = sentiment.get('label', '')
+                        score = sentiment.get('score', 0)
+                        
+                        if label == 'LABEL_0':  # Negative
+                            sentiment_map['negative'] = score
+                        elif label == 'LABEL_1':  # Neutral
+                            sentiment_map['neutral'] = score
+                        elif label == 'LABEL_2':  # Positive
+                            sentiment_map['positive'] = score
+                    
+                    return sentiment_map
+                else:
+                    print(f"⚠️ Unexpected API response format: {result}")
+                    return {"positive": 0.5, "negative": 0.25, "neutral": 0.25}
+            else:
+                print(f"⚠️ Hugging Face API error {response.status_code}: {response.text}")
+                return {"positive": 0.5, "negative": 0.25, "neutral": 0.25}
+                
         except Exception as e:
-            print(f"⚠️ Failed to load DialoGPT, falling back to distilgpt2: {e}")
-            # Fallback to an even smaller model
-            self.generator = pipeline(
-                "text-generation",
-                model="distilgpt2",
-                device=self.device,
-                max_length=256,
-                do_sample=True,
-                temperature=0.7,
-                pad_token_id=50256
-            )
-            print("✅ Fallback model loaded successfully!")
-        
-        # Initialize sentiment analysis for mood detection
-        try:
-            self.sentiment_analyzer = pipeline(
-                "sentiment-analysis",
-                model="cardiffnlp/twitter-roberta-base-sentiment-latest",
-                device=self.device
-            )
-        except Exception as e:
-            print(f"⚠️ Using fallback sentiment model: {e}")
-            self.sentiment_analyzer = pipeline(
-                "sentiment-analysis",
-                model="distilbert-base-uncased-finetuned-sst-2-english",
-                device=self.device
-            )
+            print(f"⚠️ Hugging Face API call failed: {e}")
+            return {"positive": 0.5, "negative": 0.25, "neutral": 0.25}
     
     def generate_mood_insights(self, mood_summary: Dict, sample_tracks: List[str]) -> Dict:
-        """Generate personalized insights based on music analysis"""
+        """Generate comprehensive insights from mood analysis data using AI"""
         
-        try:
-            # Analyze the mood data
-            emotional_analysis = self._analyze_emotional_state(mood_summary)
-            personality_traits = self._extract_personality_traits(mood_summary, sample_tracks)
-            recommendations = self._generate_recommendations(mood_summary)
-            mental_health_tips = self._get_mental_health_tips(mood_summary)
-            mood_coaching = self._generate_mood_coaching(mood_summary)
-            
-            return {
-                "emotional_analysis": emotional_analysis,
-                "personality_traits": personality_traits,
-                "recommendations": recommendations,
-                "mental_health_tips": mental_health_tips,
-                "mood_coaching": mood_coaching
-            }
-            
-        except Exception as e:
-            return {
-                "emotional_analysis": f"AI analysis completed with local processing",
-                "personality_traits": ["Music lover", "Emotionally expressive", "Open to experiences"],
-                "recommendations": [
-                    "Continue exploring diverse music genres",
-                    "Create mood-specific playlists",
-                    "Share music with friends and family"
-                ],
-                "mental_health_tips": [
-                    "Music can be a powerful tool for emotional regulation",
-                    "Consider using music for mindfulness and relaxation"
-                ],
-                "mood_coaching": "Your music taste shows emotional depth and creativity. Keep exploring!"
-            }
-    
-    def _analyze_emotional_state(self, mood_summary: Dict) -> str:
-        """Analyze emotional state based on mood data"""
-        mood_score = mood_summary.get('avg_mood_score', 0.5)
+        mood_score = mood_summary.get('avg_mood_score', mood_summary.get('mood_score', 0.5))
         energy = mood_summary.get('avg_energy', 0.5)
-        dominant_mood = mood_summary.get('most_common_mood', 'Neutral')
+        valence = mood_summary.get('avg_valence', 0.5)
+        dominant_mood = mood_summary.get('most_common_mood', mood_summary.get('dominant_mood', 'Mixed'))
+        emotional_range = mood_summary.get('emotional_range', 0.2)
+        total_tracks = mood_summary.get('total_tracks', len(sample_tracks) if sample_tracks else 10)
         
-        if mood_score > 0.7:
-            emotional_base = "Your music reflects a positive and uplifting emotional state."
-        elif mood_score > 0.4:
-            emotional_base = "Your music shows a balanced emotional landscape with varied feelings."
-        else:
-            emotional_base = "Your music selection suggests you may be processing deeper emotions."
+        # Create a text description for AI analysis
+        music_context = self._create_music_context(mood_score, energy, valence, dominant_mood, total_tracks, sample_tracks)
         
-        if energy > 0.7:
-            energy_note = " You're drawn to energetic and dynamic sounds."
-        elif energy > 0.4:
-            energy_note = " You enjoy a mix of calm and energetic music."
-        else:
-            energy_note = " You prefer calmer, more introspective musical experiences."
+        # Get AI sentiment analysis
+        sentiment_analysis = self._call_huggingface_api(music_context)
         
-        return emotional_base + energy_note
+        # Generate insights based on AI analysis and music data
+        emotional_analysis = self._analyze_emotional_state_with_ai(
+            mood_score, energy, valence, dominant_mood, sentiment_analysis
+        )
+        
+        personality_traits = self._identify_personality_traits_with_ai(
+            mood_score, energy, valence, emotional_range, sentiment_analysis
+        )
+        
+        recommendations = self._create_recommendations_with_ai(
+            mood_score, energy, valence, dominant_mood, sentiment_analysis
+        )
+        
+        mood_coaching = self._create_mood_coaching_with_ai(
+            mood_score, energy, valence, dominant_mood, total_tracks, sentiment_analysis
+        )
+        
+        return {
+            'emotional_analysis': emotional_analysis,
+            'personality_traits': personality_traits,
+            'recommendations': recommendations,
+            'mood_coaching': mood_coaching
+        }
     
-    def _extract_personality_traits(self, mood_summary: Dict, sample_tracks: List[str]) -> List[str]:
-        """Extract personality traits from music preferences"""
+    def _create_music_context(self, mood_score, energy, valence, dominant_mood, total_tracks, sample_tracks):
+        """Create a text context for AI analysis"""
+        track_names = []
+        if sample_tracks:
+            for track in sample_tracks[:5]:  # Use first 5 tracks
+                if isinstance(track, dict):
+                    name = track.get('name', 'Unknown')
+                    artist = track.get('artist', 'Unknown Artist')
+                    track_names.append(f"{name} by {artist}")
+                else:
+                    track_names.append(str(track))
+        
+        tracks_text = ", ".join(track_names) if track_names else "various songs"
+        
+        energy_desc = "high-energy" if energy > 0.6 else "moderate-energy" if energy > 0.3 else "low-energy"
+        valence_desc = "uplifting" if valence > 0.6 else "neutral" if valence > 0.3 else "melancholic"
+        
+        context = f"A music listener has chosen a playlist of {total_tracks} {energy_desc}, {valence_desc} songs including {tracks_text}. The dominant mood is {dominant_mood} with an overall mood score of {mood_score:.2f}. This music selection reflects their current emotional state and personality."
+        
+        return context
+    
+    def _analyze_emotional_state_with_ai(self, mood_score, energy, valence, dominant_mood, sentiment_analysis):
+        """Analyze emotional state using AI sentiment and music data"""
+        positive_score = sentiment_analysis.get('positive', 0.5)
+        negative_score = sentiment_analysis.get('negative', 0.25)
+        
+        energy_desc = "high-energy" if energy > 0.6 else "moderate-energy" if energy > 0.3 else "low-energy"
+        valence_desc = "uplifting" if valence > 0.6 else "neutral" if valence > 0.3 else "melancholic"
+        
+        if positive_score > 0.6 or mood_score > 0.7:
+            return f"Your music reveals a vibrant emotional landscape! With a mood score of {mood_score:.2f}, you're gravitating toward {energy_desc}, {valence_desc} tracks. The dominance of '{dominant_mood}' music suggests you're in an emotionally expansive phase, using music to amplify and celebrate your inner vitality. AI analysis indicates strong positive sentiment ({positive_score:.2f}) in your music choices, showing emotional resilience and a positive approach to life's challenges."
+        
+        elif positive_score > 0.4 or mood_score > 0.4:
+            return f"Your playlist shows emotional sophistication with a mood score of {mood_score:.2f}. The blend of {energy_desc} and {valence_desc} elements, centered around '{dominant_mood}' music, reveals someone who appreciates nuanced emotional experiences. AI sentiment analysis ({positive_score:.2f} positive, {negative_score:.2f} negative) suggests you're in a phase of emotional stability, using music to maintain balance rather than dramatically shift your mood."
+        
+        elif mood_score > 0.1:
+            return f"Your music choices reflect deep emotional intelligence, with a mood score of {mood_score:.2f}. The prevalence of {energy_desc}, {valence_desc} tracks in the '{dominant_mood}' category suggests you're engaged in meaningful emotional processing. AI analysis shows balanced sentiment, indicating you're using music as a companion for introspection, showing healthy emotional awareness and self-care."
+        
+        else:
+            return f"Your playlist indicates profound emotional depth with a mood score of {mood_score:.2f}. The {energy_desc}, {valence_desc} nature of your '{dominant_mood}' selections shows someone who isn't afraid to sit with complex emotions. AI sentiment analysis reveals introspective patterns, suggesting emotional courage and authenticity - you're allowing music to help you navigate and understand deeper feelings."
+    
+    def _identify_personality_traits_with_ai(self, mood_score, energy, valence, emotional_range, sentiment_analysis):
+        """Identify personality traits using AI sentiment and music preferences"""
+        positive_score = sentiment_analysis.get('positive', 0.5)
         traits = []
         
-        mood_score = mood_summary.get('avg_mood_score', 0.5)
-        energy = mood_summary.get('avg_energy', 0.5)
-        emotional_range = mood_summary.get('emotional_range', 0.2)
-        
-        # Analyze based on mood preferences
-        if mood_score > 0.6:
-            traits.append("Optimistic and positive outlook")
-        elif mood_score < 0.4:
-            traits.append("Introspective and emotionally deep")
+        # Energy-based traits enhanced with AI
+        if energy > 0.75:
+            if positive_score > 0.6:
+                traits.extend([
+                    "High energy and motivation-driven personality",
+                    "Thrives in dynamic and stimulating environments", 
+                    "Natural leader who energizes others"
+                ])
+            else:
+                traits.extend([
+                    "Intense and passionate personality",
+                    "Channels energy into meaningful pursuits",
+                    "Strong-willed and determined"
+                ])
+        elif energy > 0.5:
+            traits.extend([
+                "Well-balanced between active and contemplative states",
+                "Adaptable to various social and work environments",
+                "Demonstrates emotional flexibility"
+            ])
         else:
-            traits.append("Emotionally balanced and adaptable")
+            if positive_score > 0.5:
+                traits.extend([
+                    "Prefers calm and peaceful environments",
+                    "Values depth and meaningful conversations",
+                    "Strong capacity for concentration and reflection"
+                ])
+            else:
+                traits.extend([
+                    "Introspective and thoughtful nature",
+                    "Comfortable with solitude and quiet moments",
+                    "Deep thinker who processes emotions carefully"
+                ])
         
-        # Analyze based on energy preferences
-        if energy > 0.7:
-            traits.append("High energy and adventurous spirit")
-        elif energy < 0.3:
-            traits.append("Contemplative and peaceful nature")
+        # Valence-based traits with AI enhancement
+        if valence > 0.7:
+            traits.extend([
+                "Naturally optimistic with a positive outlook",
+                "Brings uplifting energy to social situations",
+                "Resilient in face of challenges"
+            ])
+        elif valence > 0.4:
+            traits.extend([
+                "Emotionally balanced and stable",
+                "Realistic perspective on life's ups and downs",
+                "Steady and reliable in relationships"
+            ])
         else:
-            traits.append("Versatile and mood-adaptive")
+            if sentiment_analysis.get('negative', 0) < 0.7:  # Not overwhelmingly negative
+                traits.extend([
+                    "Deep emotional sensitivity",
+                    "Values authenticity and genuine connections",
+                    "Artist-like appreciation for emotional complexity"
+                ])
+            else:
+                traits.extend([
+                    "Currently processing deep emotions",
+                    "Uses music for emotional healing",
+                    "Strong capacity for empathy and understanding"
+                ])
         
-        # Analyze emotional range
-        if emotional_range > 0.3:
-            traits.append("Complex emotional depth and openness")
-        else:
-            traits.append("Consistent emotional preferences")
+        # Emotional range insights
+        if emotional_range > 0.5:
+            traits.append("Embraces full spectrum of human emotions")
         
-        # Add music-specific trait
-        traits.append("Strong connection to music and emotions")
-        
-        return traits[:4]  # Return top 4 traits
+        return traits[:5]  # Return top 5 traits
     
-    def _generate_recommendations(self, mood_summary: Dict) -> List[str]:
-        """Generate actionable recommendations"""
+    def _create_recommendations_with_ai(self, mood_score, energy, valence, dominant_mood, sentiment_analysis):
+        """Create personalized recommendations using AI insights"""
+        positive_score = sentiment_analysis.get('positive', 0.5)
         recommendations = []
         
-        mood_score = mood_summary.get('avg_mood_score', 0.5)
-        energy = mood_summary.get('avg_energy', 0.5)
-        dominant_mood = mood_summary.get('most_common_mood', 'Neutral')
-        
-        # Mood-based recommendations
-        if mood_score < 0.4:
-            recommendations.append("Try incorporating more uplifting music gradually to boost mood")
-            recommendations.append("Create a 'mood transition' playlist moving from current to happier songs")
-        elif mood_score > 0.7:
-            recommendations.append("Share your positive energy through music with friends and family")
-        
-        # Energy-based recommendations
-        if energy < 0.3:
-            recommendations.append("Use calm music for meditation and relaxation practices")
-        elif energy > 0.7:
-            recommendations.append("Channel your high energy into creative activities or exercise")
+        if positive_score > 0.6 and energy > 0.6:
+            recommendations = [
+                "Perfect for energizing workouts and morning routines",
+                "Great soundtrack for social gatherings and celebrations",
+                "Try exploring upbeat genres like pop, dance, or funk",
+                "Consider creating workout or motivation playlists"
+            ]
+        elif positive_score > 0.4 and valence > 0.5:
+            recommendations = [
+                "Ideal for productive work sessions and focus time",
+                "Great for background music during creative activities",
+                "Explore indie, alternative, or feel-good classics",
+                "Perfect for road trips and casual listening"
+            ]
+        elif energy < 0.4:
+            recommendations = [
+                "Perfect for relaxation and unwinding after busy days",
+                "Great for meditation, reading, or quiet contemplation",
+                "Try ambient, classical, or acoustic genres",
+                "Consider evening wind-down or sleep playlists"
+            ]
         else:
-            recommendations.append("Create different playlists for various activities and moods")
+            recommendations = [
+                "Excellent for emotional processing and self-reflection",
+                "Great for journaling or creative expression",
+                "Explore singer-songwriter, folk, or introspective genres",
+                "Consider creating themed playlists for different moods"
+            ]
         
-        # General recommendations
-        recommendations.append("Explore new genres that match your current emotional preferences")
+        # Add AI-enhanced recommendation
+        if dominant_mood and dominant_mood != "Mixed":
+            recommendations.append(f"Your '{dominant_mood}' preference suggests exploring similar artists in this style")
         
-        return recommendations[:4]
+        return recommendations[:4]  # Return top 4 recommendations
     
-    def _get_mental_health_tips(self, mood_summary: Dict) -> List[str]:
-        """Provide evidence-based mental health tips"""
-        tips = [
-            "Music therapy can help regulate emotions and reduce stress",
-            "Create specific playlists for different emotional needs",
-            "Use music as a mindfulness tool - focus on lyrics, instruments, and rhythm"
-        ]
+    def _create_mood_coaching_with_ai(self, mood_score, energy, valence, dominant_mood, total_tracks, sentiment_analysis):
+        """Create mood coaching advice using AI sentiment analysis"""
+        positive_score = sentiment_analysis.get('positive', 0.5)
+        negative_score = sentiment_analysis.get('negative', 0.25)
         
-        mood_score = mood_summary.get('avg_mood_score', 0.5)
+        if positive_score > 0.6:
+            return f"Your music choices show excellent emotional self-awareness! With {total_tracks} tracks reflecting positive sentiment, you're using music effectively to maintain and boost your mood. This indicates strong emotional regulation skills and a proactive approach to mental wellness. Keep using music as your emotional ally!"
         
-        if mood_score < 0.4:
-            tips.append("Consider combining music with other wellness activities like journaling or exercise")
+        elif positive_score > 0.4:
+            return f"You demonstrate balanced emotional intelligence through your {total_tracks}-track selection. AI analysis shows you appreciate both uplifting and contemplative music, indicating emotional maturity. You understand that different situations call for different moods - this is a sign of sophisticated emotional regulation."
+        
+        elif negative_score < 0.6:
+            return f"Your playlist shows you're comfortable exploring the full range of human emotions. This emotional honesty is actually a strength - research shows that people who acknowledge difficult feelings tend to be more resilient. Your {total_tracks} songs suggest you use music for healthy emotional processing."
+        
         else:
-            tips.append("Music can enhance positive emotions and social connections")
-        
-        return tips[:3]
-    
-    def _generate_mood_coaching(self, mood_summary: Dict) -> str:
-        """Generate personalized mood coaching message"""
-        mood_score = mood_summary.get('avg_mood_score', 0.5)
-        total_tracks = mood_summary.get('total_tracks', 0)
-        dominant_mood = mood_summary.get('most_common_mood', 'Neutral')
-        
-        if mood_score > 0.6:
-            coaching = f"Your music shows great emotional awareness! With {total_tracks} tracks analyzed, "
-            coaching += "you're cultivating a positive musical environment. Keep exploring and sharing your musical journey."
-        elif mood_score < 0.4:
-            coaching = f"Your {total_tracks} track analysis shows deep emotional processing. "
-            coaching += "Music can be a powerful healing tool. Consider gradually adding some uplifting tracks to support your emotional journey."
-        else:
-            coaching = f"Your diverse collection of {total_tracks} tracks shows emotional flexibility. "
-            coaching += "You're using music effectively to match and guide your moods. Keep experimenting with new sounds!"
-        
-        return coaching
-    
-    def generate_song_recommendations(self, mood_summary: Dict, target_mood: str = "improve") -> List[str]:
-        """Generate song recommendations based on current mood"""
-        
-        mood_score = mood_summary.get('avg_mood_score', 0.5)
-        energy = mood_summary.get('avg_energy', 0.5)
-        
-        recommendations = []
-        
-        if target_mood == "improve" and mood_score < 0.5:
-            recommendations = [
-                "Try songs with uplifting lyrics and moderate tempo",
-                "Look for music in major keys with positive themes",
-                "Explore feel-good classics from your favorite genres",
-                "Consider songs that build energy gradually",
-                "Add music that makes you want to move or dance"
-            ]
-        elif target_mood == "relax":
-            recommendations = [
-                "Ambient or instrumental music for deep relaxation",
-                "Slow tempo songs with calming melodies",
-                "Nature sounds mixed with gentle music",
-                "Classical or jazz pieces with soft dynamics",
-                "Music specifically designed for meditation"
-            ]
-        elif target_mood == "energize":
-            recommendations = [
-                "Upbeat songs with strong rhythms",
-                "Music with driving bass lines and clear beats",
-                "High-energy genres like pop, rock, or electronic",
-                "Songs that make you want to move",
-                "Motivational tracks with empowering lyrics"
-            ]
-        else:
-            recommendations = [
-                "Explore music that matches your current emotional state",
-                "Try creating themed playlists for different activities",
-                "Discover new artists within your preferred genres",
-                "Mix familiar favorites with new discoveries",
-                "Use music to enhance your daily routines"
-            ]
-        
-        return recommendations[:5]
+            return f"Music can be a powerful tool for emotional healing, and your {total_tracks}-track selection shows you're using it wisely for processing complex feelings. Consider gradually introducing some higher-valence tracks to support emotional balance. Remember, it's healthy to feel all emotions - you're showing courage in facing them through music."
 
-# For backward compatibility
-MoodAI = HuggingFaceMoodAI
+# Maintain compatibility with existing code
+LocalMoodAI = HuggingFaceAI
+HuggingFaceMoodAI = HuggingFaceAI

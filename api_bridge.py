@@ -44,7 +44,7 @@ class AnalysisResponse(BaseModel):
     playlist_name: str = None
 
 # Path to your original MoodScope directory
-MOODSCOPE_PATH = Path(__file__).parent.parent
+MOODSCOPE_PATH = Path(__file__).parent
 
 def get_playlist_name_from_spotify(playlist_url: str) -> str:
     """
@@ -119,7 +119,7 @@ sys.path.append('core')
 try:
     print("📦 Importing modules...")
     from core.fallback_spotify import FallbackSpotifyAnalyzer
-    from core.local_ai_insights import LocalMoodAI
+    from core.huggingface_ai_insights import LocalMoodAI
     print("✅ Modules imported successfully")
     
     # Initialize analyzer
@@ -530,4 +530,4 @@ if __name__ == "__main__":
     print("📚 API Docs: http://localhost:8000/docs")
     print(f"🎵 MoodScope Backend: {MOODSCOPE_PATH}")
     
-    uvicorn.run(app, host="0.0.0.0", port=8000, reload=True)
+    uvicorn.run("api_bridge:app", host="0.0.0.0", port=8000, reload=True)

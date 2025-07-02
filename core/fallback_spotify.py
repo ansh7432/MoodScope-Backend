@@ -14,7 +14,7 @@ from dotenv import load_dotenv
 
 # Import AI mood categorizer
 try:
-    from ai_mood_categorizer import HuggingFaceMoodCategorizer
+    from .ai_mood_categorizer import HuggingFaceMoodCategorizer
     AI_AVAILABLE = True
     print("🤖 AI mood categorizer available!")
 except ImportError as e:
